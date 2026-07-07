@@ -1,0 +1,30 @@
+{
+  "name": "마이 바디 체크",
+  "short_name": "바디체크",
+  "description": "두통, 어지러움, 수면, 컨디션을 매일 기록하고 히스토리를 확인하는 개인 건강 체크 도구",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7fafb",
+  "theme_color": "#008c8c",
+  "lang": "ko-KR",
+  "categories": ["health", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "오늘 기록",
+      "short_name": "기록",
+      "description": "오늘의 건강 체크를 바로 입력합니다.",
+      "url": "./index.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

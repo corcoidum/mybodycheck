@@ -1,0 +1,2101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#008c8c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="바디체크">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>마이 바디 체크</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7fafb;
+      --panel: #ffffff;
+      --panel-soft: #f2f7f7;
+      --ink: #16212a;
+      --muted: #65737f;
+      --line: #dce5e8;
+      --teal: #008c8c;
+      --teal-dark: #006f70;
+      --teal-soft: #dff5f3;
+      --coral: #ff624a;
+      --coral-soft: #ffe7e2;
+      --indigo: #5c6edb;
+      --indigo-soft: #e9ecff;
+      --amber: #f5c451;
+      --green: #48a868;
+      --shadow: 0 18px 48px rgba(28, 52, 63, 0.09);
+      --radius: 8px;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 16px;
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 2px solid var(--teal);
+      border-radius: 50%;
+      color: var(--teal);
+      font-weight: 900;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button,
+    .ghost-button,
+    .primary-button,
+    .icon-button {
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 11px 12px;
+      background: transparent;
+      color: #283741;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav button.active {
+      background: linear-gradient(135deg, var(--teal), #00a3a0);
+      box-shadow: 0 12px 24px rgba(0, 140, 140, 0.2);
+      color: #fff;
+    }
+
+    .nav svg,
+    .button-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .sidebar-card {
+      margin-top: 22px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .sidebar-card strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.2;
+      color: var(--teal-dark);
+    }
+
+    .sidebar-card span,
+    .sidebar-card p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .content {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .date-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .date-strip h2 {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 30px);
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mobile-quick-save {
+      display: none;
+    }
+
+    .ghost-button,
+    .primary-button,
+    .icon-button {
+      display: inline-flex;
+      min-height: 40px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .ghost-button,
+    .icon-button {
+      border-color: var(--line);
+      background: #fff;
+      color: #293944;
+    }
+
+    .primary-button {
+      border-color: var(--teal-dark);
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      box-shadow: 0 10px 20px rgba(0, 140, 140, 0.17);
+      color: #fff;
+    }
+
+    .ghost-button:hover,
+    .primary-button:hover,
+    .icon-button:hover,
+    .nav button:hover {
+      transform: translateY(-1px);
+    }
+
+    .icon-button {
+      width: 40px;
+      padding: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.95fr) minmax(460px, 1.4fr) minmax(280px, 0.7fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 18px 0;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .panel-subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .save-state {
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    form {
+      padding: 18px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label,
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+    }
+
+    .scale-track {
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .range-value {
+      display: inline-grid;
+      min-width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--coral);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .range-value.dizzy {
+      background: var(--indigo);
+    }
+
+    .range-value.stress {
+      background: #e8793e;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #374752;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chip input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    .chip:has(input:checked) {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+
+    .condition-group {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .condition-button {
+      min-height: 70px;
+      padding: 8px 5px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #3d4a54;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .condition-button span {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .condition-button.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      box-shadow: inset 0 0 0 1px var(--teal);
+    }
+
+    .input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      font-size: 13px;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .stars {
+      display: flex;
+      gap: 5px;
+    }
+
+    .star {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #9aa7b0;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .star.active {
+      border-color: var(--indigo);
+      background: var(--indigo-soft);
+      color: var(--indigo);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .main-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .chart-shell {
+      padding: 16px 18px 18px;
+    }
+
+    .chart-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      flex-wrap: wrap;
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 18px;
+      height: 3px;
+      margin-right: 5px;
+      border-radius: 999px;
+      vertical-align: middle;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 280px;
+    }
+
+    .two-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .insight-list {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+    }
+
+    .insight {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .insight-icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: var(--radius);
+      font-weight: 900;
+    }
+
+    .insight strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .insight p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .tag {
+      padding: 5px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .tag.coral {
+      background: var(--coral-soft);
+      color: #d93926;
+    }
+
+    .tag.teal {
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+
+    .tag.indigo {
+      background: var(--indigo-soft);
+      color: #4154c7;
+    }
+
+    .calendar {
+      padding: 16px 18px 18px;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .calendar-head strong {
+      font-size: 15px;
+    }
+
+    .weekday,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .weekday {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .day-cell {
+      position: relative;
+      min-height: 58px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .day-cell.muted {
+      color: #aeb8bf;
+      background: #fbfcfd;
+    }
+
+    .day-cell.selected {
+      outline: 2px solid var(--teal);
+      outline-offset: -2px;
+    }
+
+    .day-cell small {
+      position: absolute;
+      right: 6px;
+      bottom: 5px;
+      color: rgba(22, 33, 42, 0.55);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .heat-0 { background: #ffffff; }
+    .heat-1 { background: #dff3df; }
+    .heat-2 { background: #fff1bd; }
+    .heat-3 { background: #ffbd7a; }
+    .heat-4 { background: #ff755d; color: #fff; }
+    .heat-5 { background: #d93535; color: #fff; }
+
+    .stats-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .summary {
+      padding: 16px 18px 18px;
+    }
+
+    .metric-list {
+      display: grid;
+      gap: 1px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    .metric .insight-icon {
+      width: 34px;
+      height: 34px;
+    }
+
+    .metric-label {
+      color: #374752;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .metric-value {
+      color: var(--teal-dark);
+      font-size: 21px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .metric-value small {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .records {
+      overflow: hidden;
+    }
+
+    .record-list {
+      display: grid;
+      max-height: 345px;
+      overflow: auto;
+      padding: 10px 18px 18px;
+      gap: 9px;
+    }
+
+    .record-row {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      text-align: left;
+    }
+
+    .record-row strong {
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .record-row span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .record-score {
+      min-width: 31px;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: var(--coral-soft);
+      color: #d93926;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .empty {
+      padding: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 20;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .report-view {
+      display: grid;
+      gap: 18px;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .report-card {
+      min-height: 112px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .report-card span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .report-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .report-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 1220px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px 16px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        margin-bottom: 12px;
+      }
+
+      .nav {
+        grid-template-columns: repeat(4, minmax(130px, 1fr));
+        overflow: auto;
+      }
+
+      .sidebar-card {
+        display: none;
+      }
+
+      .grid {
+        grid-template-columns: minmax(330px, 0.92fr) minmax(420px, 1.08fr);
+      }
+
+      .stats-stack {
+        grid-column: 1 / -1;
+        grid-template-columns: 0.8fr 1.2fr;
+      }
+    }
+
+    @media (max-width: 880px) {
+      body {
+        padding-bottom: calc(78px + env(safe-area-inset-bottom));
+      }
+
+      .content {
+        padding: 14px;
+      }
+
+      .topbar,
+      .date-strip {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: stretch;
+      }
+
+      .top-actions .ghost-button,
+      .top-actions .primary-button {
+        flex: 1;
+      }
+
+      .grid,
+      .two-grid,
+      .stats-stack,
+      .report-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+
+      .condition-group {
+        grid-template-columns: repeat(5, minmax(58px, 1fr));
+        overflow-x: auto;
+      }
+
+      .day-cell {
+        min-height: 48px;
+      }
+
+      .sidebar {
+        padding: 12px 14px;
+      }
+
+      .brand {
+        margin-bottom: 0;
+      }
+
+      .nav {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+        padding: 8px max(10px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-right));
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 -12px 30px rgba(22, 33, 42, 0.1);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav button {
+        display: grid;
+        min-height: 54px;
+        justify-items: center;
+        gap: 4px;
+        padding: 7px 4px;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .nav svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .mobile-quick-save {
+        position: sticky;
+        bottom: calc(78px + env(safe-area-inset-bottom));
+        z-index: 12;
+        display: flex;
+        margin: 12px -2px 0;
+      }
+
+      .mobile-quick-save .primary-button {
+        width: 100%;
+        min-height: 48px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .nav button {
+        font-size: 10px;
+      }
+
+      .panel-header,
+      form,
+      .chart-shell,
+      .calendar,
+      .summary,
+      .insight-list,
+      .report-grid {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .condition-button {
+        min-width: 64px;
+      }
+
+      canvas {
+        height: 230px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="주요 메뉴">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">M</div>
+        <div>
+          <h1>마이 바디 체크</h1>
+          <p>나만의 건강 리듬 기록</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="active" data-view-button="dashboard" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+          대시보드
+        </button>
+        <button data-view-button="calendar" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+          월간 캘린더
+        </button>
+        <button data-view-button="analytics" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-4 3 2 4-7"/></svg>
+          통계·분석
+        </button>
+        <button data-view-button="records" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+          기록 목록
+        </button>
+      </nav>
+      <div class="sidebar-card">
+        <span>기록 연속일</span>
+        <strong id="streakDays">0일</strong>
+        <p>최근 기록 흐름을 기준으로 계산됩니다.</p>
+      </div>
+      <div class="sidebar-card">
+        <span>알림 시간</span>
+        <input class="input" id="reminderTime" type="time" value="21:00" aria-label="알림 시간">
+        <button class="ghost-button" id="enableReminder" type="button" style="width:100%; margin-top:10px;">알림 켜기</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="date-strip">
+          <button class="icon-button" id="prevDay" type="button" aria-label="이전 날짜">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button class="icon-button" id="nextDay" type="button" aria-label="다음 날짜">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <h2 id="selectedDateTitle">오늘</h2>
+          <input class="input" id="dateInput" type="date" aria-label="기록 날짜" style="max-width:160px;">
+        </div>
+        <div class="top-actions">
+          <button class="ghost-button" id="todayButton" type="button">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+            오늘
+          </button>
+          <button class="ghost-button" id="exportCsv" type="button">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            CSV 내보내기
+          </button>
+          <button class="ghost-button" id="backupJson" type="button">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><rect x="5" y="19" width="14" height="2" rx="1"/></svg>
+            백업
+          </button>
+          <button class="ghost-button" id="restoreJson" type="button">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><rect x="5" y="3" width="14" height="2" rx="1"/></svg>
+            복원
+          </button>
+          <button class="primary-button" id="installApp" type="button" hidden>
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+            홈 화면 설치
+          </button>
+          <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+        </div>
+      </header>
+
+      <section class="view active" id="dashboardView">
+        <div class="grid">
+          <section class="panel" aria-labelledby="formTitle">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title" id="formTitle">오늘의 증상 기록</h3>
+                <p class="panel-subtitle">하루 한 번, 같은 시간대에 남기면 패턴이 더 선명해집니다.</p>
+              </div>
+              <div class="save-state" id="saveState">대기 중</div>
+            </div>
+            <form id="healthForm">
+              <div class="field">
+                <div class="field-label">
+                  <span>두통 강도</span>
+                  <span class="range-value" id="headacheValue">0</span>
+                </div>
+                <input id="headache" type="range" min="0" max="10" step="1" value="0">
+                <div class="scale-track" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+              </div>
+
+              <div class="field">
+                <div class="field-label">
+                  <span>어지러움 강도</span>
+                  <span class="range-value dizzy" id="dizzinessValue">0</span>
+                </div>
+                <input id="dizziness" type="range" min="0" max="10" step="1" value="0">
+                <div class="scale-track" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+              </div>
+
+              <div class="field">
+                <div class="field-label">
+                  <span>두통 부위</span>
+                  <span class="mini-note">복수 선택</span>
+                </div>
+                <div class="chips" id="locationGroup"></div>
+              </div>
+
+              <div class="field">
+                <div class="field-label">
+                  <span>컨디션</span>
+                  <span class="mini-note">5단계</span>
+                </div>
+                <div class="condition-group" id="conditionGroup"></div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="sleepHours">수면 시간 <span class="mini-note">시간</span></label>
+                  <input class="input" id="sleepHours" type="number" min="0" max="24" step="0.5" value="7">
+                </div>
+                <div class="field">
+                  <div class="field-label">
+                    <span>수면 질</span>
+                    <span class="mini-note">1-5</span>
+                  </div>
+                  <div class="stars" id="sleepQualityGroup"></div>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="medication">약 복용 기록</label>
+                  <input class="input" id="medication" type="text" placeholder="예: 이부프로펜 200mg">
+                </div>
+                <div class="field">
+                  <label for="mood">기분</label>
+                  <select id="mood">
+                    <option value="차분함">차분함</option>
+                    <option value="피곤함">피곤함</option>
+                    <option value="예민함">예민함</option>
+                    <option value="불안함">불안함</option>
+                    <option value="가벼움">가벼움</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="field-label">
+                  <span>스트레스</span>
+                  <span class="range-value stress" id="stressValue">0</span>
+                </div>
+                <input id="stress" type="range" min="0" max="10" step="1" value="0">
+                <div class="scale-track" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+              </div>
+
+              <div class="field">
+                <label for="memo">자유 메모</label>
+                <textarea id="memo" maxlength="220" placeholder="오늘의 식사, 날씨, 업무량, 통증 시작 시간 등을 남겨보세요."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button class="ghost-button" id="resetForm" type="button">초기화</button>
+                <button class="primary-button" type="submit">
+                  <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                  저장하기
+                </button>
+              </div>
+              <div class="mobile-quick-save">
+                <button class="primary-button" type="submit">
+                  <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                  오늘 기록 저장
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <div class="main-stack">
+            <section class="panel" aria-labelledby="trendTitle">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title" id="trendTitle">증상 추이</h3>
+                  <p class="panel-subtitle">최근 기록을 시간순으로 연결합니다.</p>
+                </div>
+                <select id="trendWindow" aria-label="추이 기간" style="width:96px;">
+                  <option value="14">14일</option>
+                  <option value="30" selected>30일</option>
+                  <option value="90">90일</option>
+                </select>
+              </div>
+              <div class="chart-shell">
+                <div class="chart-toolbar">
+                  <div class="legend">
+                    <span><i style="background:var(--coral);"></i>두통</span>
+                    <span><i style="background:var(--indigo);"></i>어지러움</span>
+                    <span><i style="background:var(--green);"></i>컨디션</span>
+                  </div>
+                </div>
+                <canvas id="trendChart" width="900" height="340" aria-label="증상 추이 선 차트"></canvas>
+              </div>
+            </section>
+
+            <div class="two-grid">
+              <section class="panel" aria-labelledby="insightTitle">
+                <div class="panel-header">
+                  <div>
+                    <h3 class="panel-title" id="insightTitle">상관관계 인사이트</h3>
+                    <p class="panel-subtitle">최근 30일 기록 기준입니다.</p>
+                  </div>
+                </div>
+                <div class="insight-list" id="insightList"></div>
+              </section>
+
+              <section class="panel" aria-labelledby="smallCalendarTitle">
+                <div class="panel-header">
+                  <div>
+                    <h3 class="panel-title" id="smallCalendarTitle">월간 캘린더 히트맵</h3>
+                    <p class="panel-subtitle">색상은 두통 강도 기준입니다.</p>
+                  </div>
+                </div>
+                <div class="calendar" id="dashboardCalendar"></div>
+              </section>
+            </div>
+          </div>
+
+          <aside class="stats-stack">
+            <section class="panel" aria-labelledby="summaryTitle">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title" id="summaryTitle">이번 주 요약</h3>
+                  <p class="panel-subtitle" id="summaryRange">최근 7일</p>
+                </div>
+              </div>
+              <div class="summary">
+                <div class="metric-list" id="metricList"></div>
+              </div>
+            </section>
+
+            <section class="panel records" aria-labelledby="recentTitle">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title" id="recentTitle">최근 기록</h3>
+                  <p class="panel-subtitle">날짜를 누르면 해당 기록으로 이동합니다.</p>
+                </div>
+              </div>
+              <div class="record-list" id="recentRecords"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="calendarView">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">월간 캘린더 히트맵</h3>
+              <p class="panel-subtitle">기록한 날의 두통 강도와 컨디션을 한눈에 봅니다.</p>
+            </div>
+          </div>
+          <div class="calendar" id="fullCalendar"></div>
+        </section>
+      </section>
+
+      <section class="view report-view" id="analyticsView">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">주간·월간 요약 통계</h3>
+              <p class="panel-subtitle">기록이 쌓일수록 평균과 패턴이 안정됩니다.</p>
+            </div>
+          </div>
+          <div class="report-grid" id="reportGrid"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">상관관계 분석</h3>
+              <p class="panel-subtitle">절대적인 의학 판단이 아니라 개인 기록 기반의 참고 신호입니다.</p>
+            </div>
+          </div>
+          <div class="insight-list" id="fullInsightList"></div>
+        </section>
+      </section>
+
+      <section class="view" id="recordsView">
+        <section class="panel records">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">전체 기록 목록</h3>
+              <p class="panel-subtitle">브라우저에 저장된 모든 건강 체크 기록입니다.</p>
+            </div>
+            <button class="ghost-button" id="clearAll" type="button">전체 삭제</button>
+          </div>
+          <div class="record-list" id="allRecords" style="max-height:none;"></div>
+        </section>
+      </section>
+
+      <p class="footer-note">본 서비스는 의료 행위를 대체하지 않으며, 갑작스럽거나 심한 증상은 전문 의료진과 상담하세요.</p>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = "myBodyCheck.records.v1";
+    const SETTINGS_KEY = "myBodyCheck.settings.v1";
+    const locations = ["전체", "왼쪽", "오른쪽", "앞(이마)", "뒤(후두부)", "측두부", "눈 주위", "기타"];
+    const conditions = [
+      { value: 1, icon: "×_×", label: "매우 나쁨" },
+      { value: 2, icon: ":-(", label: "나쁨" },
+      { value: 3, icon: ":-|", label: "보통" },
+      { value: 4, icon: ":-)", label: "좋음" },
+      { value: 5, icon: "^_^", label: "매우 좋음" }
+    ];
+    let deferredInstallPrompt = null;
+
+    const state = {
+      records: loadJson(STORAGE_KEY, []),
+      settings: loadJson(SETTINGS_KEY, { reminderTime: "21:00" }),
+      selectedDate: toDateKey(new Date()),
+      calendarCursor: new Date(),
+      condition: 3,
+      sleepQuality: 3
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function loadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function toDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDateKey(key) {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function addDays(key, days) {
+      const date = parseDateKey(key);
+      date.setDate(date.getDate() + days);
+      return toDateKey(date);
+    }
+
+    function formatKoreanDate(key) {
+      const date = parseDateKey(key);
+      const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+      return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${weekdays[date.getDay()]})`;
+    }
+
+    function recordMap() {
+      return new Map(state.records.map((record) => [record.date, record]));
+    }
+
+    function getRecord(dateKey) {
+      return recordMap().get(dateKey);
+    }
+
+    function saveRecord(record) {
+      const index = state.records.findIndex((item) => item.date === record.date);
+      if (index >= 0) state.records[index] = record;
+      else state.records.push(record);
+      state.records.sort((a, b) => a.date.localeCompare(b.date));
+      saveJson(STORAGE_KEY, state.records);
+    }
+
+    function initControls() {
+      $("#locationGroup").innerHTML = locations.map((location) => `
+        <label class="chip">
+          <input type="checkbox" name="locations" value="${location}">
+          ${location}
+        </label>
+      `).join("");
+
+      $("#conditionGroup").innerHTML = conditions.map((condition) => `
+        <button class="condition-button" type="button" data-condition="${condition.value}">
+          <span>${condition.icon}</span>${condition.label}
+        </button>
+      `).join("");
+
+      $("#sleepQualityGroup").innerHTML = [1, 2, 3, 4, 5].map((score) => `
+        <button class="star" type="button" data-sleep-quality="${score}" aria-label="수면 질 ${score}점">★</button>
+      `).join("");
+
+      $("#dateInput").value = state.selectedDate;
+      $("#reminderTime").value = state.settings.reminderTime || "21:00";
+
+      bindEvents();
+      loadFormForDate(state.selectedDate);
+      renderAll();
+    }
+
+    function bindEvents() {
+      $("#healthForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const record = collectForm();
+        saveRecord(record);
+        $("#saveState").textContent = "저장됨";
+        showToast("오늘의 건강 체크를 저장했습니다.");
+        renderAll();
+      });
+
+      ["headache", "dizziness", "stress"].forEach((id) => {
+        $("#" + id).addEventListener("input", updateRangeLabels);
+      });
+
+      $("#dateInput").addEventListener("change", (event) => {
+        selectDate(event.target.value);
+      });
+
+      $("#prevDay").addEventListener("click", () => selectDate(addDays(state.selectedDate, -1)));
+      $("#nextDay").addEventListener("click", () => selectDate(addDays(state.selectedDate, 1)));
+      $("#todayButton").addEventListener("click", () => selectDate(toDateKey(new Date())));
+      $("#trendWindow").addEventListener("change", renderTrendChart);
+
+      $("#resetForm").addEventListener("click", () => {
+        if (!confirm("현재 날짜의 입력값을 기본값으로 되돌릴까요? 저장된 기록은 저장하기 전까지 유지됩니다.")) return;
+        fillForm(defaultRecord(state.selectedDate));
+        $("#saveState").textContent = "수정 중";
+      });
+
+      $("#exportCsv").addEventListener("click", exportCsv);
+      $("#backupJson").addEventListener("click", backupJson);
+      $("#restoreJson").addEventListener("click", () => $("#restoreFile").click());
+      $("#restoreFile").addEventListener("change", restoreJsonFromFile);
+      $("#installApp").addEventListener("click", installApp);
+      $("#clearAll").addEventListener("click", clearAllRecords);
+
+      $("#conditionGroup").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-condition]");
+        if (!button) return;
+        state.condition = Number(button.dataset.condition);
+        renderConditionButtons();
+      });
+
+      $("#sleepQualityGroup").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-sleep-quality]");
+        if (!button) return;
+        state.sleepQuality = Number(button.dataset.sleepQuality);
+        renderSleepStars();
+      });
+
+      $$("[data-view-button]").forEach((button) => {
+        button.addEventListener("click", () => switchView(button.dataset.viewButton));
+      });
+
+      $("#reminderTime").addEventListener("change", (event) => {
+        state.settings.reminderTime = event.target.value;
+        saveJson(SETTINGS_KEY, state.settings);
+        showToast("알림 시간을 저장했습니다.");
+      });
+
+      $("#enableReminder").addEventListener("click", enableReminder);
+
+      $("#healthForm").addEventListener("input", () => {
+        $("#saveState").textContent = "수정 중";
+      });
+    }
+
+    function switchView(view) {
+      $$("[data-view-button]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.viewButton === view);
+      });
+      $$(".view").forEach((section) => section.classList.remove("active"));
+      $("#" + view + "View").classList.add("active");
+      renderAll();
+    }
+
+    function defaultRecord(date) {
+      return {
+        date,
+        headache: 0,
+        dizziness: 0,
+        locations: [],
+        condition: 3,
+        sleepHours: 7,
+        sleepQuality: 3,
+        medication: "",
+        stress: 0,
+        mood: "차분함",
+        memo: "",
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function collectForm() {
+      return {
+        date: state.selectedDate,
+        headache: Number($("#headache").value),
+        dizziness: Number($("#dizziness").value),
+        locations: $$("input[name='locations']:checked").map((input) => input.value),
+        condition: state.condition,
+        sleepHours: Number($("#sleepHours").value || 0),
+        sleepQuality: state.sleepQuality,
+        medication: $("#medication").value.trim(),
+        stress: Number($("#stress").value),
+        mood: $("#mood").value,
+        memo: $("#memo").value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function fillForm(record) {
+      $("#headache").value = record.headache;
+      $("#dizziness").value = record.dizziness;
+      $("#stress").value = record.stress;
+      $("#sleepHours").value = record.sleepHours;
+      $("#medication").value = record.medication || "";
+      $("#mood").value = record.mood || "차분함";
+      $("#memo").value = record.memo || "";
+      state.condition = Number(record.condition || 3);
+      state.sleepQuality = Number(record.sleepQuality || 3);
+      $$("input[name='locations']").forEach((input) => {
+        input.checked = (record.locations || []).includes(input.value);
+      });
+      renderConditionButtons();
+      renderSleepStars();
+      updateRangeLabels();
+    }
+
+    function loadFormForDate(dateKey) {
+      state.selectedDate = dateKey;
+      $("#dateInput").value = dateKey;
+      $("#selectedDateTitle").textContent = formatKoreanDate(dateKey);
+      const record = getRecord(dateKey) || defaultRecord(dateKey);
+      fillForm(record);
+      $("#saveState").textContent = getRecord(dateKey) ? "불러옴" : "새 기록";
+    }
+
+    function selectDate(dateKey) {
+      loadFormForDate(dateKey);
+      const selected = parseDateKey(dateKey);
+      state.calendarCursor = new Date(selected.getFullYear(), selected.getMonth(), 1);
+      renderAll();
+    }
+
+    function updateRangeLabels() {
+      $("#headacheValue").textContent = $("#headache").value;
+      $("#dizzinessValue").textContent = $("#dizziness").value;
+      $("#stressValue").textContent = $("#stress").value;
+    }
+
+    function renderConditionButtons() {
+      $$("[data-condition]").forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.condition) === state.condition);
+      });
+    }
+
+    function renderSleepStars() {
+      $$("[data-sleep-quality]").forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.sleepQuality) <= state.sleepQuality);
+      });
+    }
+
+    function renderAll() {
+      renderTrendChart();
+      renderMetrics();
+      renderInsights();
+      renderCalendar("#dashboardCalendar", true);
+      renderCalendar("#fullCalendar", false);
+      renderRecords();
+      renderReports();
+      $("#streakDays").textContent = `${calculateStreak()}일`;
+    }
+
+    function recordsInLastDays(days) {
+      const end = parseDateKey(state.selectedDate);
+      const start = new Date(end);
+      start.setDate(start.getDate() - days + 1);
+      return state.records.filter((record) => {
+        const date = parseDateKey(record.date);
+        return date >= start && date <= end;
+      });
+    }
+
+    function average(records, key) {
+      if (!records.length) return 0;
+      return records.reduce((sum, record) => sum + Number(record[key] || 0), 0) / records.length;
+    }
+
+    function renderMetrics() {
+      const week = recordsInLastDays(7);
+      const medDays = week.filter((record) => record.medication).length;
+      const completion = Math.round((week.length / 7) * 100);
+      const metrics = [
+        { icon: "H", tone: "var(--coral-soft)", color: "#d93926", label: "평균 두통 강도", value: average(week, "headache").toFixed(1), unit: "/10" },
+        { icon: "D", tone: "var(--indigo-soft)", color: "#4154c7", label: "평균 어지러움", value: average(week, "dizziness").toFixed(1), unit: "/10" },
+        { icon: "S", tone: "#edf7ed", color: "var(--green)", label: "평균 수면 시간", value: average(week, "sleepHours").toFixed(1), unit: "시간" },
+        { icon: "Q", tone: "var(--teal-soft)", color: "var(--teal-dark)", label: "수면 질 평균", value: average(week, "sleepQuality").toFixed(1), unit: "/5" },
+        { icon: "Rx", tone: "#fff5cf", color: "#9a6b00", label: "약 복용일", value: medDays, unit: "/7일" },
+        { icon: "%", tone: "#edf7ff", color: "#246fa8", label: "기록 완료율", value: completion, unit: "%" }
+      ];
+
+      $("#metricList").innerHTML = metrics.map((metric) => `
+        <div class="metric">
+          <div class="insight-icon" style="background:${metric.tone}; color:${metric.color};">${metric.icon}</div>
+          <div class="metric-label">${metric.label}</div>
+          <div class="metric-value">${metric.value} <small>${metric.unit}</small></div>
+        </div>
+      `).join("");
+    }
+
+    function renderTrendChart() {
+      const canvas = $("#trendChart");
+      const ctx = canvas.getContext("2d");
+      const days = Number($("#trendWindow").value || 30);
+      const width = canvas.width;
+      const height = canvas.height;
+      const padding = { top: 26, right: 26, bottom: 42, left: 42 };
+      const end = parseDateKey(state.selectedDate);
+      const dates = [];
+      const map = recordMap();
+
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(end);
+        date.setDate(date.getDate() - i);
+        dates.push(toDateKey(date));
+      }
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = "#e3ebee";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#7b8993";
+      ctx.font = "12px Segoe UI, sans-serif";
+      for (let y = 0; y <= 10; y += 2) {
+        const py = valueToY(y);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, py);
+        ctx.lineTo(width - padding.right, py);
+        ctx.stroke();
+        ctx.fillText(String(y), 10, py + 4);
+      }
+
+      drawLine("headache", getCss("--coral"), 10);
+      drawLine("dizziness", getCss("--indigo"), 10);
+      drawLine("condition", getCss("--green"), 5, 2);
+
+      ctx.fillStyle = "#7b8993";
+      const tickEvery = Math.max(1, Math.ceil(days / 7));
+      dates.forEach((dateKey, index) => {
+        if (index % tickEvery !== 0 && index !== dates.length - 1) return;
+        const x = indexToX(index);
+        const date = parseDateKey(dateKey);
+        ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, x - 14, height - 14);
+      });
+
+      function getCss(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function indexToX(index) {
+        if (dates.length === 1) return width / 2;
+        return padding.left + (index / (dates.length - 1)) * (width - padding.left - padding.right);
+      }
+
+      function valueToY(value, max = 10) {
+        return height - padding.bottom - (value / max) * (height - padding.top - padding.bottom);
+      }
+
+      function drawLine(key, color, max, multiplier = 1) {
+        const points = dates.map((dateKey, index) => {
+          const record = map.get(dateKey);
+          if (!record) return null;
+          return {
+            x: indexToX(index),
+            y: valueToY(Number(record[key] || 0) * multiplier, max * multiplier),
+            value: record[key]
+          };
+        });
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        let started = false;
+        points.forEach((point) => {
+          if (!point) {
+            started = false;
+            return;
+          }
+          if (!started) {
+            ctx.moveTo(point.x, point.y);
+            started = true;
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.stroke();
+
+        points.forEach((point) => {
+          if (!point) return;
+          ctx.beginPath();
+          ctx.fillStyle = "#fff";
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.arc(point.x, point.y, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+      }
+    }
+
+    function correlation(records, keyA, keyB) {
+      const pairs = records
+        .map((record) => [Number(record[keyA] || 0), Number(record[keyB] || 0)])
+        .filter(([a, b]) => Number.isFinite(a) && Number.isFinite(b));
+      if (pairs.length < 3) return null;
+      const avgA = pairs.reduce((sum, pair) => sum + pair[0], 0) / pairs.length;
+      const avgB = pairs.reduce((sum, pair) => sum + pair[1], 0) / pairs.length;
+      let numerator = 0;
+      let denomA = 0;
+      let denomB = 0;
+      pairs.forEach(([a, b]) => {
+        const da = a - avgA;
+        const db = b - avgB;
+        numerator += da * db;
+        denomA += da * da;
+        denomB += db * db;
+      });
+      const denominator = Math.sqrt(denomA * denomB);
+      return denominator ? numerator / denominator : 0;
+    }
+
+    function strengthLabel(value) {
+      const abs = Math.abs(value);
+      if (abs >= 0.6) return "강한";
+      if (abs >= 0.35) return "중간";
+      if (abs >= 0.2) return "약한";
+      return "낮은";
+    }
+
+    function renderInsights() {
+      const recent = recordsInLastDays(30);
+      const items = [
+        {
+          icon: "S",
+          tone: "var(--indigo-soft)",
+          color: "#4154c7",
+          title: "수면 시간과 두통",
+          keys: ["sleepHours", "headache"],
+          positive: "수면 시간이 길수록 두통이 함께 높아진 날이 있습니다.",
+          negative: "수면 시간이 길수록 두통이 낮아진 경향이 있습니다."
+        },
+        {
+          icon: "!",
+          tone: "var(--coral-soft)",
+          color: "#d93926",
+          title: "스트레스와 어지러움",
+          keys: ["stress", "dizziness"],
+          positive: "스트레스가 높은 날 어지러움도 같이 높아진 경향이 있습니다.",
+          negative: "스트레스가 높아도 어지러움은 낮아진 경향이 있습니다."
+        },
+        {
+          icon: "Q",
+          tone: "var(--teal-soft)",
+          color: "var(--teal-dark)",
+          title: "수면 질과 컨디션",
+          keys: ["sleepQuality", "condition"],
+          positive: "수면 질이 좋은 날 컨디션도 좋아진 경향이 있습니다.",
+          negative: "수면 질과 컨디션의 방향이 엇갈린 날이 있습니다."
+        }
+      ];
+
+      const html = items.map((item) => {
+        const r = correlation(recent, item.keys[0], item.keys[1]);
+        const value = r === null ? "자료 부족" : `r = ${r.toFixed(2)}`;
+        const label = r === null ? "기록 필요" : `${strengthLabel(r)} 상관`;
+        const tone = r === null ? "indigo" : Math.abs(r) >= 0.35 ? "coral" : "teal";
+        const text = r === null ? "3일 이상 기록하면 분석이 표시됩니다." : r >= 0 ? item.positive : item.negative;
+        return `
+          <article class="insight">
+            <div class="insight-icon" style="background:${item.tone}; color:${item.color};">${item.icon}</div>
+            <div>
+              <strong>${item.title}</strong>
+              <p>${text}</p>
+            </div>
+            <span class="tag ${tone}">${label}<br>${value}</span>
+          </article>
+        `;
+      }).join("");
+
+      $("#insightList").innerHTML = html;
+      $("#fullInsightList").innerHTML = html;
+    }
+
+    function renderCalendar(target, compact) {
+      const container = $(target);
+      if (!container) return;
+      const date = state.calendarCursor;
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const first = new Date(year, month, 1);
+      const start = new Date(year, month, 1 - first.getDay());
+      const map = recordMap();
+      const cells = [];
+
+      for (let i = 0; i < 42; i++) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + i);
+        const key = toDateKey(day);
+        const record = map.get(key);
+        const heat = record ? heatClass(record.headache) : "heat-0";
+        cells.push(`
+          <button class="day-cell ${heat} ${day.getMonth() === month ? "" : "muted"} ${key === state.selectedDate ? "selected" : ""}" type="button" data-date="${key}">
+            ${day.getDate()}
+            ${record ? `<small>H${record.headache} C${record.condition}</small>` : ""}
+          </button>
+        `);
+      }
+
+      container.innerHTML = `
+        <div class="calendar-head">
+          <button class="icon-button" type="button" data-month-shift="-1" aria-label="이전 달">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <strong>${year}년 ${month + 1}월</strong>
+          <button class="icon-button" type="button" data-month-shift="1" aria-label="다음 달">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="weekday"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+        <div class="calendar-grid">${cells.join("")}</div>
+      `;
+
+      container.querySelectorAll("[data-date]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectDate(button.dataset.date);
+          if (compact) switchView("dashboard");
+        });
+      });
+
+      container.querySelectorAll("[data-month-shift]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.calendarCursor = new Date(year, month + Number(button.dataset.monthShift), 1);
+          renderAll();
+        });
+      });
+    }
+
+    function heatClass(value) {
+      if (value <= 0) return "heat-1";
+      if (value <= 2) return "heat-1";
+      if (value <= 4) return "heat-2";
+      if (value <= 6) return "heat-3";
+      if (value <= 8) return "heat-4";
+      return "heat-5";
+    }
+
+    function renderRecords() {
+      const records = [...state.records].sort((a, b) => b.date.localeCompare(a.date));
+      const html = records.length ? records.map((record) => `
+        <button class="record-row" type="button" data-record-date="${record.date}">
+          <strong>${record.date.slice(5).replace("-", "/")}</strong>
+          <span>${(record.locations || []).length ? record.locations.join(", ") : "부위 미기록"} · ${record.mood || "기분 미기록"} · ${record.memo || "메모 없음"}</span>
+          <b class="record-score">H${record.headache}</b>
+        </button>
+      `).join("") : `<div class="empty">아직 기록이 없습니다. 오늘의 증상 기록을 저장해보세요.</div>`;
+
+      $("#recentRecords").innerHTML = records.slice(0, 8).length ? records.slice(0, 8).map((record) => `
+        <button class="record-row" type="button" data-record-date="${record.date}">
+          <strong>${record.date.slice(5).replace("-", "/")}</strong>
+          <span>${(record.locations || []).length ? record.locations.join(", ") : "부위 미기록"} · ${record.mood || "기분 미기록"} · ${record.memo || "메모 없음"}</span>
+          <b class="record-score">H${record.headache}</b>
+        </button>
+      `).join("") : `<div class="empty">최근 기록이 없습니다.</div>`;
+
+      $("#allRecords").innerHTML = html;
+      $$("[data-record-date]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectDate(button.dataset.recordDate);
+          switchView("dashboard");
+        });
+      });
+    }
+
+    function renderReports() {
+      const week = recordsInLastDays(7);
+      const month = recordsInLastDays(30);
+      const worst = [...month].sort((a, b) => b.headache - a.headache)[0];
+      const bestCondition = [...month].sort((a, b) => b.condition - a.condition)[0];
+      const cards = [
+        { label: "7일 평균 두통", value: average(week, "headache").toFixed(1), note: `${week.length}/7일 기록` },
+        { label: "30일 평균 두통", value: average(month, "headache").toFixed(1), note: `${month.length}/30일 기록` },
+        { label: "30일 평균 컨디션", value: average(month, "condition").toFixed(1), note: "5점 만점 기준" },
+        { label: "30일 평균 스트레스", value: average(month, "stress").toFixed(1), note: "10점 만점 기준" },
+        { label: "가장 두통 높았던 날", value: worst ? `H${worst.headache}` : "-", note: worst ? worst.date : "기록 없음" },
+        { label: "컨디션 좋았던 날", value: bestCondition ? `C${bestCondition.condition}` : "-", note: bestCondition ? bestCondition.date : "기록 없음" },
+        { label: "약 복용 기록", value: month.filter((record) => record.medication).length, note: "최근 30일" },
+        { label: "기록 완료율", value: `${Math.round((month.length / 30) * 100)}%`, note: "최근 30일" }
+      ];
+
+      $("#reportGrid").innerHTML = cards.map((card) => `
+        <article class="report-card">
+          <span>${card.label}</span>
+          <strong>${card.value}</strong>
+          <p>${card.note}</p>
+        </article>
+      `).join("");
+    }
+
+    function calculateStreak() {
+      const dates = new Set(state.records.map((record) => record.date));
+      let cursor = toDateKey(new Date());
+      let streak = 0;
+      while (dates.has(cursor)) {
+        streak += 1;
+        cursor = addDays(cursor, -1);
+      }
+      return streak;
+    }
+
+    function exportCsv() {
+      if (!state.records.length) {
+        showToast("내보낼 기록이 없습니다.");
+        return;
+      }
+      const headers = ["date", "headache", "dizziness", "locations", "condition", "sleepHours", "sleepQuality", "medication", "stress", "mood", "memo", "updatedAt"];
+      const rows = state.records.map((record) => headers.map((key) => {
+        const value = Array.isArray(record[key]) ? record[key].join("|") : record[key] ?? "";
+        return `"${String(value).replaceAll('"', '""')}"`;
+      }).join(","));
+      const csv = "\ufeff" + [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `my-body-check-${toDateKey(new Date())}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("CSV 파일을 내보냈습니다.");
+    }
+
+    function backupJson() {
+      const payload = {
+        app: "my-body-check",
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        settings: state.settings,
+        records: state.records
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `my-body-check-backup-${toDateKey(new Date())}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("백업 파일을 만들었습니다.");
+    }
+
+    function restoreJsonFromFile(event) {
+      const file = event.target.files[0];
+      event.target.value = "";
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(String(reader.result || "{}"));
+          const incoming = Array.isArray(payload.records) ? payload.records : [];
+          if (!incoming.length) {
+            showToast("복원할 기록이 없습니다.");
+            return;
+          }
+          if (!confirm(`${incoming.length}개의 기록을 복원할까요? 같은 날짜 기록은 백업 파일 기준으로 바뀝니다.`)) return;
+          const merged = new Map(state.records.map((record) => [record.date, record]));
+          incoming.forEach((record) => {
+            if (!record.date) return;
+            merged.set(record.date, {
+              ...defaultRecord(record.date),
+              ...record,
+              locations: Array.isArray(record.locations) ? record.locations : []
+            });
+          });
+          state.records = [...merged.values()].sort((a, b) => a.date.localeCompare(b.date));
+          state.settings = { ...state.settings, ...(payload.settings || {}) };
+          saveJson(STORAGE_KEY, state.records);
+          saveJson(SETTINGS_KEY, state.settings);
+          $("#reminderTime").value = state.settings.reminderTime || "21:00";
+          loadFormForDate(state.selectedDate);
+          renderAll();
+          showToast("백업 기록을 복원했습니다.");
+        } catch {
+          showToast("백업 파일을 읽지 못했습니다.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllRecords() {
+      if (!state.records.length) {
+        showToast("삭제할 기록이 없습니다.");
+        return;
+      }
+      if (!confirm("저장된 모든 기록을 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return;
+      state.records = [];
+      saveJson(STORAGE_KEY, state.records);
+      loadFormForDate(state.selectedDate);
+      renderAll();
+      showToast("전체 기록을 삭제했습니다.");
+    }
+
+    function installApp() {
+      if (!deferredInstallPrompt) {
+        showToast("브라우저 메뉴에서 홈 화면에 추가할 수 있습니다.");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(() => {
+        deferredInstallPrompt = null;
+        $("#installApp").hidden = true;
+      });
+    }
+
+    function enableReminder() {
+      state.settings.reminderTime = $("#reminderTime").value || "21:00";
+      saveJson(SETTINGS_KEY, state.settings);
+      if (!("Notification" in window)) {
+        showToast("이 브라우저는 알림을 지원하지 않습니다.");
+        return;
+      }
+      Notification.requestPermission().then((permission) => {
+        if (permission !== "granted") {
+          showToast("브라우저 알림 권한이 필요합니다.");
+          return;
+        }
+        showToast("페이지가 열려 있을 때 지정한 시간에 알림을 보냅니다.");
+        scheduleReminder();
+      });
+    }
+
+    function scheduleReminder() {
+      const now = new Date();
+      const [hour, minute] = (state.settings.reminderTime || "21:00").split(":").map(Number);
+      const target = new Date();
+      target.setHours(hour, minute, 0, 0);
+      if (target <= now) target.setDate(target.getDate() + 1);
+      window.clearTimeout(window.bodyCheckReminderTimer);
+      window.bodyCheckReminderTimer = window.setTimeout(() => {
+        if (Notification.permission === "granted") {
+          new Notification("마이 바디 체크", { body: "오늘의 건강 체크를 기록할 시간입니다." });
+        }
+        scheduleReminder();
+      }, target - now);
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(window.toastTimer);
+      window.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+      if (!["http:", "https:"].includes(location.protocol)) return;
+      navigator.serviceWorker.register("sw.js").catch(() => {
+        console.info("Service worker registration skipped.");
+      });
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      $("#installApp").hidden = false;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      $("#installApp").hidden = true;
+      showToast("홈 화면 설치가 완료되었습니다.");
+    });
+
+    initControls();
+    registerServiceWorker();
+  </script>
+</body>
+</html>

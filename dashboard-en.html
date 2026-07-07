@@ -1,0 +1,1500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#008c8c">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>My Body Check Dashboard</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f8fa;
+      --panel: #ffffff;
+      --panel-soft: #eef7f7;
+      --ink: #15232c;
+      --muted: #62727f;
+      --line: #dce7eb;
+      --teal: #008c8c;
+      --teal-dark: #006f70;
+      --teal-soft: #dff5f3;
+      --coral: #ff624a;
+      --coral-soft: #ffe7e2;
+      --indigo: #5c6edb;
+      --indigo-soft: #e9ecff;
+      --green: #48a868;
+      --amber: #f5c451;
+      --shadow: 0 16px 42px rgba(23, 49, 60, 0.08);
+      --radius: 8px;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 76px minmax(330px, 0.8fr) minmax(520px, 1.35fr) minmax(290px, 0.76fr);
+      gap: 16px;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .rail,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .rail {
+      position: sticky;
+      top: 16px;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+      height: calc(100vh - 32px);
+      padding: 12px;
+    }
+
+    .mark {
+      display: grid;
+      width: 50px;
+      height: 50px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--teal);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .nav button,
+    .icon-button,
+    .primary-button,
+    .secondary-button {
+      display: inline-grid;
+      place-items: center;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .nav button,
+    .icon-button {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+
+    .nav button.active,
+    .nav button:hover,
+    .icon-button:hover {
+      background: var(--teal-soft);
+      border-color: var(--teal);
+      color: var(--teal-dark);
+      transform: translateY(-1px);
+    }
+
+    svg {
+      width: 19px;
+      height: 19px;
+      stroke: currentColor;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 16px 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 4px;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.08;
+    }
+
+    h2 {
+      margin-bottom: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      grid-column: 2 / -1;
+      min-width: 0;
+    }
+
+    .date-tools,
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 38px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .date-input {
+      max-width: 160px;
+      font-weight: 800;
+    }
+
+    .primary-button,
+    .secondary-button {
+      grid-auto-flow: column;
+      gap: 8px;
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .primary-button {
+      border-color: var(--teal-dark);
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(0, 140, 140, 0.16);
+    }
+
+    .secondary-button {
+      border-color: var(--line);
+      background: #fff;
+      color: #293944;
+    }
+
+    .checkin {
+      display: grid;
+      align-content: start;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label,
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #24333d;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .value {
+      display: inline-grid;
+      min-width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .headache { background: var(--coral); }
+    .dizzy { background: var(--indigo); }
+    .stress { background: #e8793e; }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      position: relative;
+      min-height: 33px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #394852;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chip input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+
+    .chip:has(input:checked) {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+
+    .condition-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .condition {
+      min-height: 62px;
+      padding: 7px 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #3c4c56;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .condition strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 18px;
+    }
+
+    .condition.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      box-shadow: inset 0 0 0 1px var(--teal);
+    }
+
+    .stars {
+      display: flex;
+      gap: 5px;
+    }
+
+    .star {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #a0abb3;
+      font-size: 17px;
+    }
+
+    .star.active {
+      border-color: var(--indigo);
+      background: var(--indigo-soft);
+      color: var(--indigo);
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .save-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .save-state {
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .main {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .chart-area {
+      padding: 14px 16px 16px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      flex-wrap: wrap;
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 18px;
+      height: 3px;
+      margin-right: 5px;
+      border-radius: 999px;
+      vertical-align: middle;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 300px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .calendar {
+      padding: 14px 16px 16px;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .weekday,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .weekday {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .day {
+      position: relative;
+      min-height: 49px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .day.other {
+      color: #adb8bf;
+      background: #fbfcfd;
+    }
+
+    .day.selected {
+      outline: 2px solid var(--teal);
+      outline-offset: -2px;
+    }
+
+    .day small {
+      position: absolute;
+      right: 5px;
+      bottom: 4px;
+      color: rgba(22, 33, 42, 0.55);
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .heat-0 { background: #ffffff; }
+    .heat-1 { background: #dff3df; }
+    .heat-2 { background: #fff1bd; }
+    .heat-3 { background: #ffbd7a; }
+    .heat-4 { background: #ff755d; color: #fff; }
+    .heat-5 { background: #d93535; color: #fff; }
+
+    .insights {
+      display: grid;
+      gap: 9px;
+      padding: 14px 16px 16px;
+    }
+
+    .insight,
+    .metric,
+    .record {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .insight {
+      padding: 10px;
+    }
+
+    .badge {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .insight strong,
+    .record strong {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .insight p,
+    .record span {
+      margin: 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tag {
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 10px;
+      font-weight: 900;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .side {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .metrics {
+      display: grid;
+      gap: 1px;
+      padding: 10px 16px 16px;
+    }
+
+    .metric {
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      padding: 10px 0;
+      border-width: 0 0 1px;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    .metric-value {
+      color: var(--teal-dark);
+      font-size: 20px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .metric-label {
+      color: #374752;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .records {
+      display: grid;
+      gap: 8px;
+      max-height: 344px;
+      overflow: auto;
+      padding: 10px 16px 16px;
+    }
+
+    .record {
+      width: 100%;
+      padding: 10px;
+      color: inherit;
+      text-align: left;
+    }
+
+    .score {
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: var(--coral-soft);
+      color: #d93926;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 30;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      font-weight: 900;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1240px) {
+      .dashboard {
+        grid-template-columns: 68px minmax(330px, 0.9fr) minmax(480px, 1.1fr);
+      }
+
+      .side {
+        grid-column: 2 / -1;
+        grid-template-columns: 0.75fr 1.25fr;
+      }
+    }
+
+    @media (max-width: 920px) {
+      body {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom));
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .rail {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        top: auto;
+        z-index: 20;
+        height: auto;
+        padding: 8px max(10px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-right));
+        border-radius: 0;
+        border-width: 1px 0 0;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(16px);
+      }
+
+      .mark {
+        display: none;
+      }
+
+      .nav {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin: 0;
+      }
+
+      .nav button {
+        min-height: 52px;
+      }
+
+      .top,
+      .side {
+        grid-column: auto;
+      }
+
+      .top,
+      .date-tools {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .actions .secondary-button,
+      .actions .primary-button {
+        flex: 1;
+      }
+
+      .checkin,
+      .main,
+      .side,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .panel-header,
+      form,
+      .chart-area,
+      .calendar,
+      .insights,
+      .metrics,
+      .records {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .condition-grid {
+        overflow-x: auto;
+      }
+
+      .condition {
+        min-width: 62px;
+      }
+
+      canvas {
+        height: 238px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="rail" aria-label="Dashboard navigation">
+      <div class="mark" aria-hidden="true">M</div>
+      <nav class="nav">
+        <button class="active" type="button" title="Dashboard" aria-label="Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
+        </button>
+        <button type="button" title="Trends" aria-label="Trends" data-jump="#trendPanel">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-4 3 2 4-7"/></svg>
+        </button>
+        <button type="button" title="Calendar" aria-label="Calendar" data-jump="#calendarPanel">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+        </button>
+        <button type="button" title="History" aria-label="History" data-jump="#historyPanel">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+        </button>
+      </nav>
+    </aside>
+
+    <header class="top">
+      <div>
+        <h1>My Body Check</h1>
+        <p>Daily headache, dizziness, sleep, mood, medication, and condition history in one full-screen dashboard.</p>
+      </div>
+      <div class="date-tools">
+        <button class="icon-button" id="prevDay" type="button" aria-label="Previous day">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <input class="input date-input" id="dateInput" type="date" aria-label="Selected date">
+        <button class="icon-button" id="nextDay" type="button" aria-label="Next day">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <div class="actions">
+          <button class="secondary-button" id="todayButton" type="button">Today</button>
+          <button class="secondary-button" id="exportCsv" type="button">Export CSV</button>
+          <button class="primary-button" id="installApp" type="button" hidden>Install</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel checkin" aria-labelledby="checkinTitle">
+      <div class="panel-header">
+        <div>
+          <h2 id="checkinTitle">Daily Check-in</h2>
+          <p id="selectedDateTitle">Today</p>
+        </div>
+        <div class="save-state" id="saveState">Ready</div>
+      </div>
+      <form id="healthForm">
+        <div class="field">
+          <div class="field-label">
+            <span>Headache intensity</span>
+            <span class="value headache" id="headacheValue">0</span>
+          </div>
+          <input id="headache" type="range" min="0" max="10" value="0">
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Dizziness intensity</span>
+            <span class="value dizzy" id="dizzinessValue">0</span>
+          </div>
+          <input id="dizziness" type="range" min="0" max="10" value="0">
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Headache location</span>
+            <span>multi-select</span>
+          </div>
+          <div class="chips" id="locationGroup"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Condition</span>
+            <span>5 levels</span>
+          </div>
+          <div class="condition-grid" id="conditionGroup"></div>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label for="sleepHours">Sleep hours</label>
+            <input class="input" id="sleepHours" type="number" min="0" max="24" step="0.5" value="7">
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span>Sleep quality</span>
+              <span>1-5</span>
+            </div>
+            <div class="stars" id="sleepQualityGroup"></div>
+          </div>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label for="medication">Medication</label>
+            <input class="input" id="medication" type="text" placeholder="e.g. Ibuprofen 200mg">
+          </div>
+          <div class="field">
+            <label for="mood">Mood</label>
+            <select id="mood">
+              <option value="Calm">Calm</option>
+              <option value="Tired">Tired</option>
+              <option value="Sensitive">Sensitive</option>
+              <option value="Anxious">Anxious</option>
+              <option value="Light">Light</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span>Stress</span>
+            <span class="value stress" id="stressValue">0</span>
+          </div>
+          <input id="stress" type="range" min="0" max="10" value="0">
+        </div>
+
+        <div class="field">
+          <label for="memo">Notes</label>
+          <textarea id="memo" maxlength="220" placeholder="Food, weather, work load, trigger timing, or anything useful."></textarea>
+        </div>
+
+        <div class="save-row">
+          <button class="secondary-button" id="resetForm" type="button">Reset</button>
+          <button class="primary-button" type="submit">Save check-in</button>
+        </div>
+      </form>
+    </section>
+
+    <main class="main">
+      <section class="panel" id="trendPanel" aria-labelledby="trendTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="trendTitle">Trend Lines</h2>
+            <p>Recent symptom pattern, condition, and day-to-day rhythm.</p>
+          </div>
+          <select id="trendWindow" aria-label="Trend window" style="width:96px;">
+            <option value="14">14 days</option>
+            <option value="30" selected>30 days</option>
+            <option value="90">90 days</option>
+          </select>
+        </div>
+        <div class="chart-area">
+          <div class="legend">
+            <span><i style="background:var(--coral);"></i>Headache</span>
+            <span><i style="background:var(--indigo);"></i>Dizziness</span>
+            <span><i style="background:var(--green);"></i>Condition</span>
+          </div>
+          <canvas id="trendChart" width="940" height="340" aria-label="Trend line chart"></canvas>
+        </div>
+      </section>
+
+      <div class="split">
+        <section class="panel" id="calendarPanel" aria-labelledby="calendarTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="calendarTitle">Monthly Heatmap</h2>
+              <p>Color shows headache intensity.</p>
+            </div>
+          </div>
+          <div class="calendar" id="calendar"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="insightTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="insightTitle">Correlation Signals</h2>
+              <p>Lightweight personal pattern detection from your last 30 days.</p>
+            </div>
+          </div>
+          <div class="insights" id="insightList"></div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="side">
+      <section class="panel" aria-labelledby="summaryTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="summaryTitle">Weekly Summary</h2>
+            <p>Last 7 days from the selected date.</p>
+          </div>
+        </div>
+        <div class="metrics" id="metricList"></div>
+      </section>
+
+      <section class="panel" id="historyPanel" aria-labelledby="historyTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="historyTitle">History</h2>
+            <p>Tap a row to revisit that day.</p>
+          </div>
+        </div>
+        <div class="records" id="recordList"></div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = "myBodyCheck.records.v1";
+    const locations = ["Whole head", "Left", "Right", "Front", "Back", "Temple", "Around eyes", "Other"];
+    const conditions = [
+      { value: 1, icon: "×_×", label: "Very low" },
+      { value: 2, icon: ":-(", label: "Low" },
+      { value: 3, icon: ":-|", label: "Okay" },
+      { value: 4, icon: ":-)", label: "Good" },
+      { value: 5, icon: "^_^", label: "Great" }
+    ];
+    let deferredInstallPrompt = null;
+
+    const state = {
+      records: loadJson(STORAGE_KEY, []),
+      selectedDate: toDateKey(new Date()),
+      calendarCursor: new Date(),
+      condition: 3,
+      sleepQuality: 3
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function loadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function toDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDateKey(key) {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function addDays(key, days) {
+      const date = parseDateKey(key);
+      date.setDate(date.getDate() + days);
+      return toDateKey(date);
+    }
+
+    function formatDate(key) {
+      return parseDateKey(key).toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function recordMap() {
+      return new Map(state.records.map((record) => [record.date, record]));
+    }
+
+    function getRecord(dateKey) {
+      return recordMap().get(dateKey);
+    }
+
+    function defaultRecord(date) {
+      return {
+        date,
+        headache: 0,
+        dizziness: 0,
+        locations: [],
+        condition: 3,
+        sleepHours: 7,
+        sleepQuality: 3,
+        medication: "",
+        stress: 0,
+        mood: "Calm",
+        memo: "",
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function init() {
+      $("#locationGroup").innerHTML = locations.map((location) => `
+        <label class="chip">
+          <input type="checkbox" name="locations" value="${location}">
+          ${location}
+        </label>
+      `).join("");
+
+      $("#conditionGroup").innerHTML = conditions.map((condition) => `
+        <button class="condition" type="button" data-condition="${condition.value}">
+          <strong>${condition.icon}</strong>${condition.label}
+        </button>
+      `).join("");
+
+      $("#sleepQualityGroup").innerHTML = [1, 2, 3, 4, 5].map((score) => `
+        <button class="star" type="button" data-sleep-quality="${score}" aria-label="Sleep quality ${score}">★</button>
+      `).join("");
+
+      bindEvents();
+      loadFormForDate(state.selectedDate);
+      renderAll();
+      registerServiceWorker();
+    }
+
+    function bindEvents() {
+      $("#healthForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveRecord(collectForm());
+        $("#saveState").textContent = "Saved";
+        showToast("Check-in saved.");
+        renderAll();
+      });
+
+      ["headache", "dizziness", "stress"].forEach((id) => {
+        $("#" + id).addEventListener("input", updateRangeLabels);
+      });
+
+      $("#dateInput").addEventListener("change", (event) => selectDate(event.target.value));
+      $("#prevDay").addEventListener("click", () => selectDate(addDays(state.selectedDate, -1)));
+      $("#nextDay").addEventListener("click", () => selectDate(addDays(state.selectedDate, 1)));
+      $("#todayButton").addEventListener("click", () => selectDate(toDateKey(new Date())));
+      $("#trendWindow").addEventListener("change", renderTrendChart);
+      $("#exportCsv").addEventListener("click", exportCsv);
+      $("#resetForm").addEventListener("click", () => {
+        fillForm(defaultRecord(state.selectedDate));
+        $("#saveState").textContent = "Editing";
+      });
+
+      $("#conditionGroup").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-condition]");
+        if (!button) return;
+        state.condition = Number(button.dataset.condition);
+        renderConditionButtons();
+      });
+
+      $("#sleepQualityGroup").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-sleep-quality]");
+        if (!button) return;
+        state.sleepQuality = Number(button.dataset.sleepQuality);
+        renderSleepStars();
+      });
+
+      $$("[data-jump]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelector(button.dataset.jump).scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      $("#healthForm").addEventListener("input", () => {
+        $("#saveState").textContent = "Editing";
+      });
+
+      $("#installApp").addEventListener("click", installApp);
+    }
+
+    function collectForm() {
+      return {
+        date: state.selectedDate,
+        headache: Number($("#headache").value),
+        dizziness: Number($("#dizziness").value),
+        locations: $$("input[name='locations']:checked").map((input) => input.value),
+        condition: state.condition,
+        sleepHours: Number($("#sleepHours").value || 0),
+        sleepQuality: state.sleepQuality,
+        medication: $("#medication").value.trim(),
+        stress: Number($("#stress").value),
+        mood: $("#mood").value,
+        memo: $("#memo").value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function saveRecord(record) {
+      const index = state.records.findIndex((item) => item.date === record.date);
+      if (index >= 0) state.records[index] = record;
+      else state.records.push(record);
+      state.records.sort((a, b) => a.date.localeCompare(b.date));
+      saveJson(STORAGE_KEY, state.records);
+    }
+
+    function fillForm(record) {
+      $("#headache").value = record.headache || 0;
+      $("#dizziness").value = record.dizziness || 0;
+      $("#stress").value = record.stress || 0;
+      $("#sleepHours").value = record.sleepHours || 7;
+      $("#medication").value = record.medication || "";
+      $("#mood").value = record.mood || "Calm";
+      $("#memo").value = record.memo || "";
+      state.condition = Number(record.condition || 3);
+      state.sleepQuality = Number(record.sleepQuality || 3);
+      $$("input[name='locations']").forEach((input) => {
+        input.checked = (record.locations || []).includes(input.value);
+      });
+      renderConditionButtons();
+      renderSleepStars();
+      updateRangeLabels();
+    }
+
+    function loadFormForDate(dateKey) {
+      state.selectedDate = dateKey;
+      $("#dateInput").value = dateKey;
+      $("#selectedDateTitle").textContent = formatDate(dateKey);
+      fillForm(getRecord(dateKey) || defaultRecord(dateKey));
+      $("#saveState").textContent = getRecord(dateKey) ? "Loaded" : "New";
+    }
+
+    function selectDate(dateKey) {
+      loadFormForDate(dateKey);
+      const selected = parseDateKey(dateKey);
+      state.calendarCursor = new Date(selected.getFullYear(), selected.getMonth(), 1);
+      renderAll();
+    }
+
+    function updateRangeLabels() {
+      $("#headacheValue").textContent = $("#headache").value;
+      $("#dizzinessValue").textContent = $("#dizziness").value;
+      $("#stressValue").textContent = $("#stress").value;
+    }
+
+    function renderConditionButtons() {
+      $$("[data-condition]").forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.condition) === state.condition);
+      });
+    }
+
+    function renderSleepStars() {
+      $$("[data-sleep-quality]").forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.sleepQuality) <= state.sleepQuality);
+      });
+    }
+
+    function recordsInLastDays(days) {
+      const end = parseDateKey(state.selectedDate);
+      const start = new Date(end);
+      start.setDate(start.getDate() - days + 1);
+      return state.records.filter((record) => {
+        const date = parseDateKey(record.date);
+        return date >= start && date <= end;
+      });
+    }
+
+    function average(records, key) {
+      if (!records.length) return 0;
+      return records.reduce((sum, record) => sum + Number(record[key] || 0), 0) / records.length;
+    }
+
+    function renderAll() {
+      renderTrendChart();
+      renderMetrics();
+      renderCalendar();
+      renderInsights();
+      renderRecords();
+    }
+
+    function renderTrendChart() {
+      const canvas = $("#trendChart");
+      const ctx = canvas.getContext("2d");
+      const days = Number($("#trendWindow").value || 30);
+      const width = canvas.width;
+      const height = canvas.height;
+      const padding = { top: 24, right: 24, bottom: 42, left: 42 };
+      const end = parseDateKey(state.selectedDate);
+      const dates = [];
+      const map = recordMap();
+
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(end);
+        date.setDate(date.getDate() - i);
+        dates.push(toDateKey(date));
+      }
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "#e3ebee";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#7b8993";
+      ctx.font = "12px Segoe UI, sans-serif";
+
+      for (let y = 0; y <= 10; y += 2) {
+        const py = valueToY(y);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, py);
+        ctx.lineTo(width - padding.right, py);
+        ctx.stroke();
+        ctx.fillText(String(y), 12, py + 4);
+      }
+
+      drawLine("headache", css("--coral"), 10);
+      drawLine("dizziness", css("--indigo"), 10);
+      drawLine("condition", css("--green"), 5, 2);
+
+      const tickEvery = Math.max(1, Math.ceil(days / 7));
+      dates.forEach((dateKey, index) => {
+        if (index % tickEvery !== 0 && index !== dates.length - 1) return;
+        const date = parseDateKey(dateKey);
+        ctx.fillStyle = "#7b8993";
+        ctx.fillText(`${date.getMonth() + 1}/${date.getDate()}`, indexToX(index) - 14, height - 14);
+      });
+
+      function css(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function indexToX(index) {
+        if (dates.length === 1) return width / 2;
+        return padding.left + (index / (dates.length - 1)) * (width - padding.left - padding.right);
+      }
+
+      function valueToY(value, max = 10) {
+        return height - padding.bottom - (value / max) * (height - padding.top - padding.bottom);
+      }
+
+      function drawLine(key, color, max, multiplier = 1) {
+        const points = dates.map((dateKey, index) => {
+          const record = map.get(dateKey);
+          if (!record) return null;
+          return {
+            x: indexToX(index),
+            y: valueToY(Number(record[key] || 0) * multiplier, max * multiplier)
+          };
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        let started = false;
+        points.forEach((point) => {
+          if (!point) {
+            started = false;
+            return;
+          }
+          if (!started) {
+            ctx.moveTo(point.x, point.y);
+            started = true;
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.stroke();
+        points.forEach((point) => {
+          if (!point) return;
+          ctx.beginPath();
+          ctx.fillStyle = "#fff";
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.arc(point.x, point.y, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+      }
+    }
+
+    function renderMetrics() {
+      const week = recordsInLastDays(7);
+      const metrics = [
+        { icon: "H", label: "Avg headache", value: average(week, "headache").toFixed(1), unit: "/10", tone: "var(--coral-soft)", color: "#d93926" },
+        { icon: "D", label: "Avg dizziness", value: average(week, "dizziness").toFixed(1), unit: "/10", tone: "var(--indigo-soft)", color: "#4154c7" },
+        { icon: "S", label: "Avg sleep", value: average(week, "sleepHours").toFixed(1), unit: "h", tone: "#edf7ed", color: "var(--green)" },
+        { icon: "Q", label: "Sleep quality", value: average(week, "sleepQuality").toFixed(1), unit: "/5", tone: "var(--teal-soft)", color: "var(--teal-dark)" },
+        { icon: "Rx", label: "Medication days", value: week.filter((record) => record.medication).length, unit: "/7", tone: "#fff5cf", color: "#9a6b00" },
+        { icon: "%", label: "Completion", value: Math.round((week.length / 7) * 100), unit: "%", tone: "#edf7ff", color: "#246fa8" }
+      ];
+      $("#metricList").innerHTML = metrics.map((metric) => `
+        <article class="metric">
+          <div class="badge" style="background:${metric.tone}; color:${metric.color};">${metric.icon}</div>
+          <div class="metric-label">${metric.label}</div>
+          <div class="metric-value">${metric.value}<small>${metric.unit}</small></div>
+        </article>
+      `).join("");
+    }
+
+    function renderCalendar() {
+      const container = $("#calendar");
+      const date = state.calendarCursor;
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const first = new Date(year, month, 1);
+      const start = new Date(year, month, 1 - first.getDay());
+      const map = recordMap();
+      const cells = [];
+
+      for (let i = 0; i < 42; i++) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + i);
+        const key = toDateKey(day);
+        const record = map.get(key);
+        cells.push(`
+          <button class="day ${record ? heatClass(record.headache) : "heat-0"} ${day.getMonth() === month ? "" : "other"} ${key === state.selectedDate ? "selected" : ""}" type="button" data-date="${key}">
+            ${day.getDate()}
+            ${record ? `<small>H${record.headache}</small>` : ""}
+          </button>
+        `);
+      }
+
+      container.innerHTML = `
+        <div class="calendar-head">
+          <button class="icon-button" type="button" data-month-shift="-1" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span>${parseDateKey(`${year}-${String(month + 1).padStart(2, "0")}-01`).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+          <button class="icon-button" type="button" data-month-shift="1" aria-label="Next month">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="weekday"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div class="calendar-grid">${cells.join("")}</div>
+      `;
+
+      container.querySelectorAll("[data-date]").forEach((button) => {
+        button.addEventListener("click", () => selectDate(button.dataset.date));
+      });
+      container.querySelectorAll("[data-month-shift]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.calendarCursor = new Date(year, month + Number(button.dataset.monthShift), 1);
+          renderCalendar();
+        });
+      });
+    }
+
+    function heatClass(value) {
+      if (value <= 2) return "heat-1";
+      if (value <= 4) return "heat-2";
+      if (value <= 6) return "heat-3";
+      if (value <= 8) return "heat-4";
+      return "heat-5";
+    }
+
+    function correlation(records, keyA, keyB) {
+      const pairs = records.map((record) => [Number(record[keyA] || 0), Number(record[keyB] || 0)]);
+      if (pairs.length < 3) return null;
+      const avgA = pairs.reduce((sum, pair) => sum + pair[0], 0) / pairs.length;
+      const avgB = pairs.reduce((sum, pair) => sum + pair[1], 0) / pairs.length;
+      let numerator = 0;
+      let denomA = 0;
+      let denomB = 0;
+      pairs.forEach(([a, b]) => {
+        const da = a - avgA;
+        const db = b - avgB;
+        numerator += da * db;
+        denomA += da * da;
+        denomB += db * db;
+      });
+      const denominator = Math.sqrt(denomA * denomB);
+      return denominator ? numerator / denominator : 0;
+    }
+
+    function renderInsights() {
+      const recent = recordsInLastDays(30);
+      const data = [
+        ["S", "Sleep vs headache", "sleepHours", "headache", "Longer sleep and headache move together.", "Longer sleep tends to pair with lower headache."],
+        ["!", "Stress vs dizziness", "stress", "dizziness", "Higher stress and dizziness rise together.", "Stress and dizziness move in opposite directions."],
+        ["Q", "Sleep quality vs condition", "sleepQuality", "condition", "Better sleep quality pairs with better condition.", "Sleep quality and condition are not moving together."]
+      ];
+      $("#insightList").innerHTML = data.map(([icon, title, a, b, positive, negative]) => {
+        const r = correlation(recent, a, b);
+        const abs = r === null ? 0 : Math.abs(r);
+        const level = r === null ? "Need data" : abs >= 0.6 ? "Strong" : abs >= 0.35 ? "Medium" : abs >= 0.2 ? "Light" : "Low";
+        return `
+          <article class="insight">
+            <div class="badge" style="background:var(--teal-soft); color:var(--teal-dark);">${icon}</div>
+            <div>
+              <strong>${title}</strong>
+              <p>${r === null ? "Save at least 3 days to unlock this signal." : r >= 0 ? positive : negative}</p>
+            </div>
+            <span class="tag">${level}<br>${r === null ? "--" : r.toFixed(2)}</span>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderRecords() {
+      const records = [...state.records].sort((a, b) => b.date.localeCompare(a.date));
+      $("#recordList").innerHTML = records.length ? records.slice(0, 14).map((record) => `
+        <button class="record" type="button" data-record-date="${record.date}">
+          <div class="badge" style="background:var(--coral-soft); color:#d93926;">${record.date.slice(5).replace("-", "/")}</div>
+          <div>
+            <strong>${(record.locations || []).length ? record.locations.join(", ") : "No location"} · ${record.mood || "No mood"}</strong>
+            <span>${record.memo || record.medication || "No notes"}</span>
+          </div>
+          <b class="score">H${record.headache || 0}</b>
+        </button>
+      `).join("") : `<p>No records yet. Save today's check-in to start your history.</p>`;
+
+      $$("[data-record-date]").forEach((button) => {
+        button.addEventListener("click", () => selectDate(button.dataset.recordDate));
+      });
+    }
+
+    function exportCsv() {
+      if (!state.records.length) {
+        showToast("No records to export.");
+        return;
+      }
+      const headers = ["date", "headache", "dizziness", "locations", "condition", "sleepHours", "sleepQuality", "medication", "stress", "mood", "memo", "updatedAt"];
+      const rows = state.records.map((record) => headers.map((key) => {
+        const value = Array.isArray(record[key]) ? record[key].join("|") : record[key] ?? "";
+        return `"${String(value).replaceAll('"', '""')}"`;
+      }).join(","));
+      const blob = new Blob(["\ufeff" + [headers.join(","), ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `my-body-check-${toDateKey(new Date())}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("CSV exported.");
+    }
+
+    function installApp() {
+      if (!deferredInstallPrompt) {
+        showToast("Use your browser menu to add this dashboard to the home screen.");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(() => {
+        deferredInstallPrompt = null;
+        $("#installApp").hidden = true;
+      });
+    }
+
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+      if (!["http:", "https:"].includes(location.protocol)) return;
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(window.toastTimer);
+      window.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2300);
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      $("#installApp").hidden = false;
+    });
+
+    init();
+  </script>
+</body>
+</html>

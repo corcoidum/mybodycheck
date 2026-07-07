@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="마이 바디 체크 아이콘">
+  <rect width="512" height="512" rx="112" fill="#008c8c"/>
+  <path d="M154 263c0-64 44-112 102-112s102 48 102 112c0 73-58 130-102 153-44-23-102-80-102-153z" fill="#ffffff"/>
+  <path d="M256 186v144" fill="none" stroke="#008c8c" stroke-width="34" stroke-linecap="round"/>
+  <path d="M184 258h144" fill="none" stroke="#008c8c" stroke-width="34" stroke-linecap="round"/>
+  <path d="M159 127c31-28 65-42 97-42s66 14 97 42" fill="none" stroke="#dff5f3" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="375" cy="352" r="43" fill="#ff624a"/>
+  <path d="M354 352l14 14 29-32" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
